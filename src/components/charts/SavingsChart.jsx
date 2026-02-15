@@ -1,6 +1,7 @@
 import {
   AreaChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -18,6 +19,7 @@ export default function SavingsChart({ data, currency }) {
   }
 
   const hasNegative = data.some((d) => (d.savings ?? d.amount) < 0);
+  const hasProjected = data.some((d) => d.savingsProjected != null);
 
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -53,13 +55,16 @@ export default function SavingsChart({ data, currency }) {
             border: '1px solid #262626',
             borderRadius: '8px',
           }}
-          formatter={(value) => [
-            `${Number(value).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })} ${currency}`,
-            'Savings',
-          ]}
+          formatter={(value, name) => {
+            const label = name === 'savingsProjected' ? 'Savings (no data yet)' : 'Savings';
+            return [
+              `${Number(value).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} ${currency}`,
+              label,
+            ];
+          }}
         />
         <Area
           type="monotone"
@@ -68,6 +73,18 @@ export default function SavingsChart({ data, currency }) {
           strokeWidth={2}
           fill="url(#savingsGrad)"
         />
+        {hasProjected && (
+          <Line
+            type="monotone"
+            dataKey="savingsProjected"
+            connectNulls
+            stroke="#22c55e"
+            strokeWidth={2}
+            strokeDasharray="6 4"
+            dot={false}
+            isAnimationActive={false}
+          />
+        )}
       </AreaChart>
     </ResponsiveContainer>
   );

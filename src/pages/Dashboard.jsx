@@ -205,8 +205,31 @@ export default function Dashboard() {
   }, [chartView, transactions, selectedYearDate]);
 
   const savingsChartData = useMemo(() => {
-    if (chartView === 'year')
-      return savingsByMonthInYear(transactions, selectedYearDate);
+    if (chartView === 'year') {
+      const raw = savingsByMonthInYear(transactions, selectedYearDate);
+      const now = new Date();
+      const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      let lastKnownIndex = -1;
+      let lastKnownSavings = 0;
+      raw.forEach((point, i) => {
+        if (point.date <= currentYearMonth) {
+          lastKnownIndex = i;
+          lastKnownSavings = point.savings;
+        }
+      });
+      return raw.map((point, i) => {
+        if (i <= lastKnownIndex) {
+          const savingsProjected = i === lastKnownIndex ? point.savings : null;
+          return { ...point, isProjected: false, savingsProjected };
+        }
+        return {
+          ...point,
+          savings: lastKnownSavings,
+          isProjected: true,
+          savingsProjected: lastKnownSavings,
+        };
+      });
+    }
     if (chartView === 'fiveyear')
       return savingsByYearLast5(transactions);
     return savingsByMonthAllTime(transactions);
