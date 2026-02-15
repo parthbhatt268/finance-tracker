@@ -26,7 +26,7 @@ Build with the same mode:
 ## Persistence
 
 - **Demo mode:** First run loads `src/data/demo.json` into `localStorage` (key: `finance-tracker-demo`). Later runs use that stored data.
-- **Real mode:** First run loads `public/real-data.json` (if present) into `localStorage` (key: `finance-tracker-real`). If the file is missing, you start with empty transactions and default categories. All add/edit/delete changes are saved in `localStorage` only; the app does not write back to `real-data.json`.
+- **Real mode:** First run loads `public/real-data.json` (if present) into `localStorage` (key: `finance-tracker-real`). If the file is missing, you start with empty transactions and default categories. Edits are auto-saved to `localStorage`. Use the **Save to file** button in the header (real mode only) to write the current data back to `public/real-data.json`. This only works when running the dev server (`npm run dev:real`); the button is hidden in demo mode.
 
 ## Data files
 

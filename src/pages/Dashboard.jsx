@@ -52,6 +52,7 @@ export default function Dashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [initialCreditCategory, setInitialCreditCategory] = useState(null);
   const [initialCreditDescription, setInitialCreditDescription] = useState(null);
+  const [savingToFile, setSavingToFile] = useState(false);
   const { show: toast } = useToast();
 
   useEffect(() => {
@@ -160,6 +161,28 @@ export default function Dashboard() {
     toast('Transaction deleted');
   };
 
+  const handleSaveToFile = async () => {
+    if (!data || MODE !== 'real') return;
+    setSavingToFile(true);
+    try {
+      const res = await fetch('/api/save-real-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (res.ok && result.ok) {
+        toast('Saved to real-data.json');
+      } else {
+        toast(result.error || 'Failed to save');
+      }
+    } catch (e) {
+      toast('Failed to save (is the dev server running?)');
+    } finally {
+      setSavingToFile(false);
+    }
+  };
+
   const transactionsForChartPeriod = useMemo(() => {
     if (chartView === 'year') return filterByYear(transactions, selectedYearDate);
     if (chartView === 'fiveyear') {
@@ -213,6 +236,15 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="flex items-center gap-4">
+            {MODE === 'real' && (
+              <Button
+                variant="primary"
+                onClick={handleSaveToFile}
+                disabled={savingToFile}
+              >
+                {savingToFile ? 'Saving…' : 'Save to file'}
+              </Button>
+            )}
             <span className="text-sm font-medium text-[var(--color-muted)]">Net Worth</span>
             <span
               className={`text-2xl font-bold tabular-nums ${
